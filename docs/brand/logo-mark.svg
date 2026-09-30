@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DBRB logo">
+  <defs>
+    <linearGradient id="dbrb-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <!-- Chat bubble: "brb" is chat language -->
+  <path d="M14 6h36a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10H28l-10 8v-8h-4A10 10 0 0 1 4 42V16A10 10 0 0 1 14 6z" fill="url(#dbrb-g)"/>
+  <!-- Database cylinder -->
+  <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+    <ellipse cx="32" cy="17" rx="13" ry="4.5"/>
+    <path d="M19 17v18c0 2.5 5.8 4.5 13 4.5s13-2 13-4.5V17"/>
+  </g>
+  <!-- Typing indicator: "be right back..." -->
+  <g fill="#fff">
+    <circle cx="25" cy="28" r="2.6"/>
+    <circle cx="32" cy="28" r="2.6" opacity=".75"/>
+    <circle cx="39" cy="28" r="2.6" opacity=".5"/>
+  </g>
+</svg>
