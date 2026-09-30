@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DBRB">
+  <!-- DBRB mark, single colour: follows `currentColor` (ink, white, or print). -->
+  <path fill="currentColor" fill-rule="evenodd"
+        d="M28 16H60A48 48 0 0 1 60 112H28A8 8 0 0 1 20 104V24A8 8 0 0 1 28 16Z
+           M42.5 64L56 42H62A22 22 0 0 1 62 86H56Z"/>
+</svg>

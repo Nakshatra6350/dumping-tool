@@ -1,22 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 158 72" role="img" aria-label="DBRB">
-  <!-- DBRB horizontal lockup for LIGHT backgrounds: Return D mark + DBRB wordmark.
-       Wordmark caps are centred on the D; gap between them is 14 units. -->
+  <!-- DBRB horizontal lockup for DARK backgrounds: Return D mark + DBRB wordmark in light ink. -->
   <svg x="4" y="12" width="44" height="48" viewBox="20 16 88 96">
     <defs>
-      <linearGradient id="dbrb-lockup-g" gradientUnits="userSpaceOnUse" x1="20" y1="16" x2="108" y2="112">
+      <linearGradient id="dbrb-lockup-dark-g" gradientUnits="userSpaceOnUse" x1="20" y1="16" x2="108" y2="112">
         <stop offset="0" stop-color="#6366f1"/>
         <stop offset="1" stop-color="#a855f7"/>
       </linearGradient>
     </defs>
-    <path fill="url(#dbrb-lockup-g)" fill-rule="evenodd"
+    <path fill="url(#dbrb-lockup-dark-g)" fill-rule="evenodd"
           d="M28 16H60A48 48 0 0 1 60 112H28A8 8 0 0 1 20 104V24A8 8 0 0 1 28 16Z
              M42.5 64L56 42H62A22 22 0 0 1 62 86H56Z"/>
   </svg>
   <svg x="62" y="17.8" width="92.3" height="36.4" viewBox="0 0 142 56">
     <defs>
-      <clipPath id="dbrb-lockup-clip"><rect x="-2" y="8" width="146" height="40"/></clipPath>
+      <clipPath id="dbrb-lockup-dark-clip"><rect x="-2" y="8" width="146" height="40"/></clipPath>
     </defs>
-    <g clip-path="url(#dbrb-lockup-clip)" fill="none" stroke="#0f172a" stroke-width="8" stroke-linejoin="miter" stroke-linecap="butt">
+    <g clip-path="url(#dbrb-lockup-dark-clip)" fill="none" stroke="#eef0f6" stroke-width="8" stroke-linejoin="miter" stroke-linecap="butt">
       <path d="M4 12H14A16 16 0 0 1 14 44H4Z"/>
       <path d="M46 52V12H55A8 8 0 0 1 55 28H46M46 28H57A8 8 0 0 1 57 44H46"/>
       <path d="M81 52V12H90A8 8 0 0 1 90 28H81M88 28L101 52"/>

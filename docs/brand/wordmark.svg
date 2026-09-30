@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 142 56" role="img" aria-label="DBRB">
+  <!-- DBRB wordmark: a custom geometric logotype drawn from straight stems and circular bowls
+       (8-unit stroke). Not a font, so never retype it. Colour follows `currentColor`. -->
+  <defs>
+    <clipPath id="dbrb-wm-clip">
+      <rect x="-2" y="8" width="146" height="40"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#dbrb-wm-clip)" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="miter" stroke-linecap="butt">
+    <path d="M4 12H14A16 16 0 0 1 14 44H4Z"/>
+    <path d="M46 52V12H55A8 8 0 0 1 55 28H46M46 28H57A8 8 0 0 1 57 44H46"/>
+    <path d="M81 52V12H90A8 8 0 0 1 90 28H81M88 28L101 52"/>
+    <path d="M118 52V12H127A8 8 0 0 1 127 28H118M118 28H129A8 8 0 0 1 129 44H118"/>
+  </g>
+</svg>

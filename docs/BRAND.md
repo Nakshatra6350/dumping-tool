@@ -1,10 +1,11 @@
 # DBRB brand guide
 
-<p align="center"><img src="brand/logo-lockup.svg" alt="dbrb, your database will be right back" width="420"></p>
+<p align="center"><img src="brand/logo-lockup.svg" alt="DBRB" width="360"></p>
+<p align="center"><em>Your database will be right back.</em></p>
 
 ## The name
 
-**DBRB**, written **`dbrb`** in the logo and wordmark and **DBRB** in running text. It's pronounced *"dee-bee-ar-bee"*.
+**DBRB**, in capitals in the wordmark and in running text. Lowercase **`dbrb`** is used only in code: the CLI, packages and domains. It's pronounced *"dee-bee-ar-bee"*.
 
 It works on two levels, and both are true:
 1. **"DB, be right back."** From *brb*, the chat shorthand everyone knows. Your database went away for a moment, and it's coming right back.
@@ -54,17 +55,45 @@ Plan names stay plain (Free, Pro, Max, Enterprise) so pricing is instantly clear
 - **Enterprise, compliance, legal and billing pages are strictly professional.** No puns there.
 - **Status words are clear first, and on-brand second.** For example, "Running" (not only "brb…"), so screen readers and non-native speakers always understand.
 
-## Logo
+## Logo: the "Return D"
 
-| Asset | File |
-|---|---|
-| Mark (app icon, avatar) | [`brand/logo-mark.svg`](brand/logo-mark.svg) |
-| Lockup (mark + wordmark + tagline) | [`brand/logo-lockup.svg`](brand/logo-lockup.svg) |
+<p align="center">
+  <img src="brand/logo-mark.svg" alt="DBRB mark" width="96">&nbsp;&nbsp;&nbsp;
+  <img src="brand/app-icon.svg" alt="DBRB app icon" width="96">
+</p>
 
-- **Concept:** a chat bubble (the "brb" moment) containing a database cylinder with a **typing indicator** ("be right back…").
-- **Clear space:** keep at least ¼ of the mark's width empty around it.
-- **Small sizes:** a simplified 16px favicon (bubble + dots only) comes in Phase 0.
-- **Don't:** recolor the mark outside the brand gradient, stretch it, or put it on busy photos.
+**Concept.** A bold, solid **D** whose inner space is cut as a left-pointing tip, so the empty space inside the letter **points back (←)**: *be right back*, restore.
+- The solid weight signals stability and trust.
+- The inner shape doubles as a **tag**, echoing snapshots and versions.
+- There's no pictogram (no shield, lock or database cylinder), so it can't be mistaken for a stock icon.
+
+**Where the idea came from:**
+- **Airbnb's Bélo:** one shape carrying several meanings.
+- **FedEx:** meaning hidden in negative space.
+- **Dribbble's data-security category:** the strongest marks there are bold letterforms with a single meaningful cut.
+
+**Construction** (128-unit grid; straight lines and circular arcs only, so it's reproducible and has no font dependency):
+- **Outer D:** from x = 20 to x = 108 and y = 16 to y = 112. The bowl has a 48-unit radius; the left corners have an 8-unit radius.
+- **Inner space:** the tip is at (42.5, 64); the inner bowl has a 22-unit radius. The wall is 22–26 units thick all round, so the weight looks even.
+
+| Asset | File | Use |
+|---|---|---|
+| Mark (gradient) | [`brand/logo-mark.svg`](brand/logo-mark.svg) | Default mark on light or dark backgrounds |
+| Mark (one colour) | [`brand/logo-mark-mono.svg`](brand/logo-mark-mono.svg) | Single-colour contexts: print, embossing, monochrome UI (`currentColor`) |
+| App icon / favicon | [`brand/app-icon.svg`](brand/app-icon.svg) | App icon, favicon, social avatars. Also used by the app as `public/favicon.svg` |
+| Wordmark | [`brand/wordmark.svg`](brand/wordmark.svg) | "DBRB" on its own (`currentColor`) |
+| Lockup, light backgrounds | [`brand/logo-lockup.svg`](brand/logo-lockup.svg) | Mark + wordmark, dark ink |
+| Lockup, dark backgrounds | [`brand/logo-lockup-dark.svg`](brand/logo-lockup-dark.svg) | Mark + wordmark, light ink |
+
+### Usage rules
+- **Clear space:** keep at least the width of the D's stem (about ¼ of the mark's width) empty on every side.
+- **Minimum size:** mark 16 px (at 24 px and below, prefer the app icon); lockup 96 px wide.
+- **Colour:** the brand gradient `#6366f1 → #a855f7` runs top-left to bottom-right. On the gradient itself, use the white mark (as in the app icon).
+- **Don't:**
+  - Flip or rotate the mark. The tip must always point left.
+  - Stretch it, outline it, add shadows or effects, or recolour it outside the brand palette.
+  - Place it on busy photos.
+  - Retype the wordmark in a font.
 
 ## Color and type
 
@@ -75,8 +104,9 @@ Plan names stay plain (Free, Pro, Max, Enterprise) so pricing is instantly clear
 | Ink (light UI) | `#0f172a` on `#f5f6fa` | Text on the light UI |
 | Success | `#0ca30c` | "Back" / success states (always with icon + label) |
 | Critical | `#d03b3b` | Failures (always with icon + label) |
-| Wordmark font | JetBrains Mono, 700 | `dbrb` wordmark (the developer feel) |
+| Wordmark | Custom geometric logotype (drawn, not a font) | "DBRB" in the logo |
 | UI font | Inter | Everything else |
+| Code font | JetBrains Mono | Code, CLI examples, technical values |
 
 ## Names and handles (checked 30 Sep 2026)
 
