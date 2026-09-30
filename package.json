@@ -1,26 +1,40 @@
 {
-  "name": "work",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "dumping-tool",
+  "version": "2.0.0",
+  "description": "Self-hosted scheduler for PostgreSQL and MySQL database dumps, with a web dashboard, email notifications and secure downloads.",
+  "main": "src/server.js",
+  "private": true,
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/**/*.test.js\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "backup",
+    "pg_dump",
+    "mysqldump",
+    "scheduler",
+    "dashboard"
+  ],
+  "author": "Nakshatra Garg",
+  "license": "MIT",
   "dependencies": {
-    "child_process": "^1.0.2",
-    "dotenv": "^16.4.5",
-    "express": "^4.18.3",
-    "fs": "^0.0.1-security",
-    "mongodb": "^6.4.0",
-    "mongoose": "^8.2.0",
-    "mysql": "^2.18.1",
-    "mysqldump": "^3.2.0",
-    "node-cron": "^3.0.3",
-    "nodemon": "^3.1.0",
-    "pg": "^8.11.3",
-    "pg-dump": "^0.10.0"
+    "@aws-sdk/client-s3": "^3.1143.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "croner": "^10.0.1",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.10.3",
+    "mysql2": "^3.24.5",
+    "nodemailer": "^10.0.13",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
   }
 }

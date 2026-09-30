@@ -1,0 +1,33 @@
+# Self-hosted stack (e.g. an Oracle Cloud "Always Free" VM or any Linux box).
+#   cp .env.example .env   # fill in secrets
+#   docker compose up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGO_URI: ${MONGO_URI:-mongodb://mongo:27017/dumping_tool}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    volumes:
+      - dumps:/app/data
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dumps:
+  mongo:
