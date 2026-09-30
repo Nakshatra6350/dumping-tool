@@ -1660,11 +1660,11 @@ textarea.input {
   color: var(--text-2);
 }
 
-.step-pane {
+.step-pane.animate {
   animation: slide-in 0.4s var(--ease) both;
 }
 
-.step-pane.back {
+.step-pane.animate.back {
   animation-name: slide-in-back;
 }
 
@@ -1811,6 +1811,9 @@ textarea.input {
   background: var(--accent-soft);
   color: var(--text);
   font-size: 13px;
+}
+
+.chip.new {
   animation: pop 0.3s var(--ease-spring);
 }
 

@@ -22,11 +22,38 @@ const SCHEDULES = [
 
 const browserTz = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
-const toLocalInput = (date) => {
-  const d = new Date(date);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
+// Times are offered in 30-minute slots (HH:00 / HH:30).
+const pad = (n) => String(n).padStart(2, "0");
+const ALL_SLOTS = Array.from({ length: 48 }, (_, i) => `${pad(Math.floor(i / 2))}:${pad((i % 2) * 30)}`);
+const localDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const localTime = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+// Earliest bookable slot: the next :00 or :30 strictly after now.
+const nextSlot = () => {
+  const d = new Date();
+  d.setSeconds(0, 0);
+  d.setMinutes(Math.floor(d.getMinutes() / 30) * 30 + 30);
+  return d;
 };
+
+// Slots still in the future for a given local date ("YYYY-MM-DD").
+const slotsFor = (date) => {
+  const first = nextSlot();
+  const firstDate = localDate(first);
+  if (date > firstDate) return ALL_SLOTS;
+  if (date < firstDate) return [];
+  return ALL_SLOTS.filter((t) => t >= localTime(first));
+};
+
+const timeLabel = (hhmm) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return new Date(2000, 0, 1, h, m).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+};
+
+const slotOptions = (slots, selected) =>
+  html`${slots.map((t) => html`<option value="${t}" ${t === selected ? raw("selected") : ""}>${timeLabel(t)}</option>`)}`;
+
+const runAtDate = (f) => new Date(`${f.runDate}T${f.runTime}`);
 
 const parseUri = (uri) => {
   const url = new URL(uri);
@@ -47,11 +74,11 @@ const describeSchedule = (f) => {
     case "manual":
       return "Only when you click “Run now”";
     case "once":
-      return f.runAt ? `Once on ${formatDate(new Date(f.runAt))}` : "Once (pick a date)";
+      return f.runDate && f.runTime ? `Once on ${formatDate(runAtDate(f))}` : "Once (pick a date)";
     case "daily":
-      return `Every day at ${f.time}`;
+      return `Every day at ${timeLabel(f.time)}`;
     case "weekly":
-      return f.daysOfWeek.length ? `Every ${f.daysOfWeek.map((d) => DAYS[d]).join(", ")} at ${f.time}` : "Weekly (pick days)";
+      return f.daysOfWeek.length ? `Every ${f.daysOfWeek.map((d) => DAYS[d]).join(", ")} at ${timeLabel(f.time)}` : "Weekly (pick days)";
     case "cron":
       return `Cron “${f.cron}”`;
     default:
@@ -76,7 +103,8 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
     ssl: false,
     hasPassword: false,
     scheduleType: "daily",
-    runAt: toLocalInput(Date.now() + 60 * 60 * 1000),
+    runDate: localDate(nextSlot()),
+    runTime: localTime(nextSlot()),
     time: "02:00",
     daysOfWeek: [1],
     cron: "0 2 * * *",
@@ -105,7 +133,6 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
       ssl: job.connection.ssl,
       hasPassword: job.connection.hasPassword,
       scheduleType: s.type,
-      runAt: s.runAt ? toLocalInput(s.runAt) : f.runAt,
       time: s.time || f.time,
       daysOfWeek: s.daysOfWeek?.length ? s.daysOfWeek : f.daysOfWeek,
       cron: s.cron || f.cron,
@@ -115,6 +142,11 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
       retention: job.retention,
       enabled: job.enabled,
     });
+    // Keep a saved one-time run only if it is still in the future.
+    if (s.runAt && new Date(s.runAt) > new Date()) {
+      f.runDate = localDate(new Date(s.runAt));
+      f.runTime = localTime(new Date(s.runAt));
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -201,10 +233,13 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
         ? html`<div class="form-ok" style="background:var(--accent-soft);color:var(--text)">${icon("info")} No automatic runs. Use “Save & run now” or the Run button on the job.</div>`
         : ""}
       ${f.scheduleType === "once"
-        ? html`<div class="field" style="max-width:320px"><label for="runAt">Date & time</label><input class="input" type="datetime-local" id="runAt" data-f="runAt" value="${f.runAt}" /></div>`
+        ? html`<div class="grid-2" style="max-width:440px">
+            <div class="field"><label for="runDate">Date</label><input class="input" type="date" id="runDate" data-f="runDate" min="${localDate(nextSlot())}" value="${f.runDate}" /></div>
+            <div class="field"><label for="runTime">Time</label><select class="input" id="runTime" data-f="runTime">${slotOptions(slotsFor(f.runDate), f.runTime)}</select></div>
+          </div>`
         : ""}
       ${f.scheduleType === "daily" || f.scheduleType === "weekly"
-        ? html`<div class="field" style="max-width:200px"><label for="time">Time</label><input class="input" type="time" id="time" data-f="time" value="${f.time}" /></div>`
+        ? html`<div class="field" style="max-width:200px"><label for="time">Time</label><select class="input" id="time" data-f="time">${slotOptions(ALL_SLOTS.includes(f.time) ? ALL_SLOTS : [f.time, ...ALL_SLOTS], f.time)}</select></div>`
         : ""}
       ${f.scheduleType === "weekly"
         ? html`<div class="field"><span class="label">Days</span><div class="days">${DAYS.map(
@@ -231,6 +266,19 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
       <div class="row faint">${icon("clock")} <span id="sched-desc">${describeSchedule(f)}</span></div>
     </div>`;
 
+  const chipHtml = (e, i, isNew = false) =>
+    html`<span class="chip ${isNew ? "new" : ""}">${e}<button type="button" data-remove-email="${i}" aria-label="Remove ${e}">${icon("x")}</button></span>`;
+
+  // Updates the chips in place so the rest of the step doesn't re-render.
+  const renderChips = (newIndex = -1) => {
+    const box = $("#chips");
+    const entry = $("#email-entry");
+    if (!box || !entry) return;
+    box.querySelectorAll(".chip").forEach((c) => c.remove());
+    entry.insertAdjacentHTML("beforebegin", f.notifyEmails.map((e, i) => chipHtml(e, i, i === newIndex).s).join(""));
+    entry.placeholder = f.notifyEmails.length ? "Add another…" : "name@company.com";
+  };
+
   const notifyStep = () => html`
     <h2>Notifications & retention</h2>
     <p>Recipients get an email with a sign-in link to download the dump.</p>
@@ -242,7 +290,7 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
       <div class="field">
         <label for="email-entry">Notify these emails</label>
         <div class="chips-input" id="chips">
-          ${f.notifyEmails.map((e, i) => html`<span class="chip">${e}<button type="button" data-remove-email="${i}" aria-label="Remove ${e}">${icon("x")}</button></span>`)}
+          ${f.notifyEmails.map((e, i) => chipHtml(e, i))}
           <input id="email-entry" type="email" placeholder="${f.notifyEmails.length ? "Add another…" : "name@company.com"}" autocomplete="off" />
         </div>
         <span class="hint">Press Enter or comma to add. Up to 10 addresses.</span>
@@ -314,15 +362,16 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
         : html`<button type="button" class="btn primary" data-nav="next">Continue ${icon("chevronRight")}</button>`}`.s;
   };
 
-  const paintPane = () => {
+  const paintPane = (animate = false) => {
     const pane = $("#pane");
-    pane.innerHTML = html`<div class="step-pane ${direction === "back" ? "back" : ""}">${PANES[step]()}</div>`.s;
+    const cls = animate ? `animate ${direction === "back" ? "back" : ""}` : "";
+    pane.innerHTML = html`<div class="step-pane ${cls}">${PANES[step]()}</div>`.s;
     $("#step-error").innerHTML = "";
   };
 
   const paint = () => {
     paintSteps();
-    paintPane();
+    paintPane(true);
     paintFoot();
   };
 
@@ -352,7 +401,9 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
       if (!f.database.trim()) return "Enter or pick the database to back up.";
     }
     if (i === 2) {
-      if (f.scheduleType === "once" && (!f.runAt || new Date(f.runAt) <= new Date())) return "Pick a date and time in the future.";
+      if (f.scheduleType === "once" && (!f.runDate || !f.runTime || runAtDate(f) <= new Date())) {
+        return "That time has already passed. Pick a later date or time.";
+      }
       if (f.scheduleType === "weekly" && !f.daysOfWeek.length) return "Pick at least one day.";
       if (f.scheduleType === "cron" && f.cron.trim().split(/\s+/).length < 5) return "A cron expression needs 5 fields.";
     }
@@ -377,7 +428,7 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
     connection: connectionPayload(),
     schedule: {
       type: f.scheduleType,
-      runAt: f.scheduleType === "once" ? new Date(f.runAt).toISOString() : undefined,
+      runAt: f.scheduleType === "once" ? runAtDate(f).toISOString() : undefined,
       time: f.time,
       daysOfWeek: f.daysOfWeek,
       cron: f.cron.trim(),
@@ -415,9 +466,21 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
   const onField = (e) => {
     const key = e.target.dataset.f;
     if (!key) return;
+    if (key === "runDate") {
+      // Wait for a complete date (change event); never allow a past day.
+      if (e.type !== "change") return;
+      const minDate = localDate(nextSlot());
+      if (!e.target.value || e.target.value < minDate) e.target.value = minDate;
+      f.runDate = e.target.value;
+      const slots = slotsFor(f.runDate);
+      if (!slots.includes(f.runTime)) f.runTime = slots[0];
+      $("#runTime").innerHTML = slotOptions(slots, f.runTime).s;
+      $("#sched-desc").textContent = describeSchedule(f);
+      return;
+    }
     f[key] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     if (key === "retention") $("#ret-val").textContent = f.retention;
-    if (["runAt", "time", "cron"].includes(key) && $("#sched-desc")) $("#sched-desc").textContent = describeSchedule(f);
+    if (["runTime", "time", "cron"].includes(key) && $("#sched-desc")) $("#sched-desc").textContent = describeSchedule(f);
     if (["host", "port", "username", "password", "uri", "ssl"].includes(key) && testState) {
       testState = null;
       $("#test-out").innerHTML = "";
@@ -439,8 +502,8 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
     }
     if (values.length) {
       entry.value = "";
-      paintPane();
-      $("#email-entry").focus();
+      renderChips(f.notifyEmails.length - 1);
+      entry.focus();
     }
   };
 
@@ -451,8 +514,7 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
         flushEmailEntry();
       } else if (e.key === "Backspace" && !e.target.value && f.notifyEmails.length) {
         f.notifyEmails.pop();
-        paintPane();
-        $("#email-entry").focus();
+        renderChips();
       }
       return;
     }
@@ -535,7 +597,8 @@ export const renderJobForm = async ({ root, user, params, navigate }) => {
     }
     if (t.dataset.removeEmail) {
       f.notifyEmails.splice(Number(t.dataset.removeEmail), 1);
-      paintPane();
+      renderChips();
+      $("#email-entry").focus();
     }
   });
 
