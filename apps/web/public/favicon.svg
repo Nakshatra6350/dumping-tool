@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DBRB">
+  <!-- DBRB app icon / favicon: the Return D in white on the brand gradient tile.
+       (Mark scaled to 70% and centred; coordinates baked in, no transforms.) -->
+  <defs>
+    <linearGradient id="dbrb-icon-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#dbrb-icon-bg)"/>
+  <path fill="#fff" fill-rule="evenodd"
+        d="M38.8 30.4H61.2A33.6 33.6 0 0 1 61.2 97.6H38.8A5.6 5.6 0 0 1 33.2 92V36A5.6 5.6 0 0 1 38.8 30.4Z
+           M48.95 64L58.4 48.6H62.6A15.4 15.4 0 0 1 62.6 79.4H58.4Z"/>
+</svg>

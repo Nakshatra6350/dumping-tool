@@ -1,0 +1,8 @@
+# Store and check out text files with LF endings on every OS, so diffs stay
+# clean and shell scripts / Dockerfiles work on Linux.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

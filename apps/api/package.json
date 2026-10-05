@@ -1,0 +1,29 @@
+{
+  "name": "@dbrb/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DBRB HTTP API.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:int": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@dbrb/core": "workspace:*",
+    "@dbrb/shared": "workspace:*",
+    "cookie": "^2.0.1",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "rate-limiter-flexible": "^11.2.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1"
+  }
+}

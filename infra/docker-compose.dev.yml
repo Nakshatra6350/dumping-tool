@@ -1,0 +1,68 @@
+# DBRB local development stack. Mirrors the production services so that
+# "deploy later" is a configuration change, not a rewrite:
+#
+#   MySQL 8.4  -> RDS MySQL          (platform DB + one database per tenant)
+#   Valkey     -> ElastiCache        (queues, rate limits, cache invalidation)
+#   RustFS     -> Amazon S3          (S3-compatible, supports presigned URLs)
+#   Mailpit    -> Amazon SES         (catches every email; UI on :8025)
+#
+#   pnpm infra:up      start        pnpm infra:down     stop
+#   pnpm infra:reset   stop and delete all local data
+name: dbrb-dev
+
+services:
+  mysql:
+    image: mysql:8.4
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --max-connections=500
+    environment:
+      MYSQL_ROOT_PASSWORD: dbrb_dev_root
+      MYSQL_DATABASE: dbrb_platform
+    ports:
+      - "127.0.0.1:3310:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pdbrb_dev_root"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible object storage (RustFS, an open-source S3 server).
+  # DBRB only uses the standard S3 API, so this behaves like Amazon S3.
+  # Development buckets are created by `pnpm infra:up` (packages/core/src/cli/dev-buckets.ts):
+  #   dbrb-platform      the platform's own bucket ("managed S3")
+  #   dbrb-tenant-demo   stands in for a customer's own bucket
+  s3:
+    image: rustfs/rustfs:1.0.1
+    environment:
+      RUSTFS_ACCESS_KEY: dbrb_s3_dev
+      RUSTFS_SECRET_KEY: dbrb_s3_dev_secret
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "127.0.0.1:9000:9000" # S3 API
+      - "127.0.0.1:9001:9001" # web console
+    volumes:
+      - s3-data:/data
+
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    ports:
+      - "127.0.0.1:1025:1025" # SMTP
+      - "127.0.0.1:8025:8025" # inbox UI
+
+volumes:
+  mysql-data:
+  s3-data:

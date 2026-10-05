@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+pnpm-lock.yaml
+legacy
+packages/core/drizzle
+*.svg
+LICENSE
+ee/LICENSE
+
+# Prose is wrapped by hand.
+*.md

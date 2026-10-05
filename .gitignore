@@ -1,9 +1,26 @@
+# Dependencies and build output
 node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secrets and local configuration (never commit)
 .env
 .env.*
 !.env.example
+
+# Local data
 data/
 logs/
-sqlDumps/
-postgresDumps/
 *.log
+
+# Legacy app (kept runnable in legacy/)
+legacy/sqlDumps/
+legacy/postgresDumps/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
