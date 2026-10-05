@@ -1,0 +1,53 @@
+DBRB Enterprise Edition Licence
+
+Copyright (c) 2026 Nakshatra Garg. All rights reserved.
+
+This licence applies to everything in this directory ("ee/") and its
+subdirectories (the "Software"). It does not apply to the rest of the DBRB
+repository, which is licensed under the GNU Affero General Public License,
+version 3 only.
+
+1. What you may do without a subscription
+
+   You may read the Software, and you may copy, modify and run it for the
+   purposes of development and testing only.
+
+2. What needs a subscription
+
+   You may use the Software in production only if you hold a valid DBRB
+   Enterprise subscription or licence key from the copyright holder that covers
+   that use, and only within the limits of that subscription (for example the
+   number of instances or workspaces).
+
+3. What you may not do
+
+   You may not sell, rent, lend, sublicense or redistribute the Software or
+   works based on it, offer it to others as a hosted or managed service, or
+   remove or work around any licence key check, except as a written agreement
+   with the copyright holder allows.
+
+4. Changes you make
+
+   You may modify the Software for your own permitted use. Modifications remain
+   subject to this licence. If you send your modifications to the DBRB project,
+   the DBRB contributor licence agreement applies to them.
+
+5. Other software
+
+   Third-party components included in or used by the Software are licensed
+   under their own terms, which this licence does not change.
+
+6. Ending
+
+   This licence ends automatically if you break its terms. When it ends, you
+   must stop using the Software and delete your copies of it.
+
+7. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.

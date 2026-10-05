@@ -1,6 +1,7 @@
 # DBRB Product Plan v2: multi-tenant, compliance-first backup platform on AWS
 
 > **Status:** **approved** (30 Sep 2026). Changes will be handled as they come up during the phases. Domain purchase approved. Primary AWS region: **Mumbai (`ap-south-1`)**. Product name: **DBRB**, *"Your database will be right back."* (see [BRAND.md](BRAND.md)).
+> **Updated:** 4 Oct 2026. Build order changed to **local first**, and storage decisions refined. See decisions 16 to 21 and [section 11a](#11a-build-order-in-practice-local-first-in-milestones).
 > **Research date:** 30 Sep 2026.
 > **Caveats:** AWS prices are approximate on-demand figures and must be checked in the [AWS Pricing Calculator](https://calculator.aws/) for your region before you spend. This is not legal advice; have a lawyer review the Terms, Privacy Policy and DPA before any paid launch.
 
@@ -25,6 +26,12 @@
 | 13 | Languages | English + Hindi at launch, then Spanish, Portuguese (BR), German, French, Japanese; Arabic (RTL) later |
 | 14 | Time budget | 6–8 hours/week, possibly 12–16. Estimates below are in **hours** |
 | 15 | Name | **DBRB** ("DB, be right back" / DataBase Restore & Backup). Primary domain `dbrb.dev`, GitHub org `dbrbhq`. See [BRAND.md](BRAND.md) |
+| 16 | Build order | **Local first.** Everything is built and tested on a local Docker stack that mirrors AWS service for service. The AWS account, the domain and deployment move to a later Deploy phase |
+| 17 | Storage switch | **A setting in the admin panel, not an environment variable.** The platform owner sets the default, decides which options workspaces may choose, and can pin one workspace. Each workspace's admin chooses within those rules |
+| 18 | S3 details | Bucket, region, endpoint and keys are **typed into the admin panel**, tested (write, read, signed link, delete) and stored encrypted. Nothing about storage is in environment files except the folder used by local disk |
+| 19 | Switching storage | Affects **new backups only**. Every stored object records where it is, so earlier backups stay downloadable from wherever they were written |
+| 20 | Delivery | **Milestones with a check-in after each:** M1 foundation and storage, M2 backup engines, M3 experience |
+| 21 | Engines after PostgreSQL and MySQL | **MongoDB, SQL Server, SQLite, Redis, Cassandra, ClickHouse.** The engine plug-in interface therefore supports single-stream, multi-file and direct-to-storage backups |
 
 ### Why AGPL-3.0 + commercial (plain-English)
 - **What the free edition allows:** anyone can use, self-host and modify the core for free. If someone runs a *modified* version as a service for others, they must publish their changes. That stops a big company from quietly reselling your product.
@@ -112,7 +119,7 @@ The current dump engine, schedule logic, validation rules and UI design system a
 The AWS Free Plan for new accounts (since 15 Jul 2025) gives **$100–$200 in credits valid for 6 months**, not the old 12-month free tier ([AWS terms](https://aws.amazon.com/free/terms), [summary](https://infratally.com/articles/aws-free-tier-2026/)).
 
 ### High availability and traffic spikes
-- **Stateless API.** Sessions live in signed cookies plus a Redis revocation list, so any instance can serve any request. Redis pub/sub fans SSE events out to whichever instance holds the user's connection.
+- **Stateless API.** A session is a row in the platform database; the cookie carries a random token and only its hash is stored. Any instance can serve any request, and signing someone out everywhere is one delete. Redis pub/sub fans SSE events out to whichever instance holds the user's connection.
 - **Load balancing.** An ALB with health checks (`/healthz`, `/readyz`) and connection draining. Deploys drain SSE and in-flight requests cleanly.
 - **Auto scaling.** API scales on CPU and request count; workers scale on **BullMQ queue depth** (a custom CloudWatch metric).
 - **Backpressure.** Per-tenant and per-plan concurrency limits; global limiter in Redis; rate limits per IP, user, tenant and API key.
@@ -326,14 +333,14 @@ New obligations introduced by this version, on top of v1 (GDPR, DPDP, CCPA, EU C
 
 | Layer | Choice |
 |---|---|
-| Frontend | **React + TypeScript + Vite**; TanStack Router + Query; react-i18next (ICU); Radix-based accessible components with our existing design tokens; Motion for animations |
+| Frontend | **React + TypeScript + Vite**; TanStack Router + Query; react-i18next; Radix-based accessible components with our existing design tokens; CSS animations; fonts bundled with the app (no third-party font service) |
 | API | Node 22 + **TypeScript**, Express 5, zod (schemas shared with the frontend) |
 | App DB | **MySQL 8.4 LTS**; **Drizzle ORM** (typed MySQL, migrations) with a custom per-tenant migration runner |
 | Queue / cache | **Redis (Valkey) + BullMQ** |
 | Workers | Node/TS spawning `pg_dump`/`mysqldump`/`mariadb-dump` (Go agent later) |
 | AWS | EC2 (Graviton), ALB + ASG, RDS MySQL, ElastiCache, S3, KMS, SES, Lambda, EventBridge Scheduler, CloudWatch, SSM Parameter Store, Route 53, CloudFront |
 | Infra as code | **AWS CDK in TypeScript** (same language as the app); GitHub Actions deploying via **OIDC** (no stored AWS keys) |
-| Monorepo | pnpm + Turborepo: `apps/web`, `apps/api`, `apps/worker`, `apps/platform-console`, `packages/shared`, `infra/`, `ee/` |
+| Monorepo | pnpm workspaces (Turborepo only if build times ask for it): `apps/web`, `apps/api`, `packages/core`, `packages/shared`, `infra/`, `ee/`; `apps/worker` arrives in M2. The platform console is a section of the web app, not a separate app |
 | Testing | Vitest, Playwright E2E, Testcontainers (MySQL 5.7/8.0/8.4, MariaDB 10/11, PG 12–18), **cross-tenant isolation suite**, kill-switch chaos tests, axe, k6 load tests |
 | Supply chain | CodeQL, Dependabot, gitleaks, Trivy, Syft SBOM, license allow-list, cosign-signed images |
 | Observability | CloudWatch logs and metrics, OpenTelemetry traces, error tracking with PII scrubbing, public status page |
@@ -357,12 +364,27 @@ Estimates are in hours. At **8 h/week, 1 week ≈ 8 h**; at 16 h/week, halve the
 | **5. Scale and AWS depth** | Stage B infrastructure via CDK: ALB + API ASG, worker Spot ASG scaling on queue depth, RDS MySQL, ElastiCache; graceful draining; k6 spike tests; **EC2 vs Lambda vs Fargate benchmark** + decision record | 45 | ~6 | ~3 |
 | **6. Proof of recovery** | One-click restore; automated restore verification in throwaway containers; recovery drills (RTO/RPO); missed-backup alerts; evidence-pack PDF | 55 | ~7 | ~3.5 |
 | **7. Launch readiness** | Pick payment provider (after entity decision); lawyer review; DPA and sub-processor pages; docs and marketing site (Astro, multi-language); status page; pen-test; launch (Show HN, Product Hunt, r/selfhosted) | 40 | ~5 | ~2.5 |
-| **8+. Growth** | Go agent (outbound-only, in customer networks); more engines (Mongo, SQL Server, SQLite, Redis); SSO/SCIM; PII-masked staging refresh; Slack/Teams/webhooks; more languages + RTL; SOC 2 readiness | ongoing | | |
+| **8+. Growth** | Go agent (outbound-only, in customer networks); more engines (MongoDB, SQL Server, SQLite, Redis, Cassandra, ClickHouse); SSO/SCIM; PII-masked staging refresh; Slack/Teams/webhooks; more languages + RTL; SOC 2 readiness | ongoing | | |
 
 - **Launchable multi-tenant MVP** (Phases 0–3): about **245 h**, which is **~7.5 months at 8 h/week or ~4 months at 16 h/week**.
 - **Full platform through launch** (Phases 0–7): about **440 h**, which is **~13 months at 8 h/week or ~7 months at 16 h/week**.
 
 Please treat these as honest estimates. A smaller MVP cut is possible if you want to launch sooner.
+
+### 11a. Build order in practice: local first, in milestones
+
+The phases above describe *what* gets built. Since 4 Oct 2026 the *order* is: build everything locally in three milestones, with a check-in after each, then deploy.
+
+| Milestone | What it delivers | Comes from |
+|---|---|---|
+| **M1. Foundation and storage** | Monorepo; local Docker stack; platform database plus one database and one MySQL user per workspace; encryption of secrets; sign-up, sign-in, sessions; roles; layered settings with pins; storage on local disk, platform S3 or the workspace's own S3, configured in the admin panel; tamper-evident activity record; React app in English and Hindi; tests, linting and CI | Phases 0 and 1 |
+| **M2. Backup engines** | Engine plug-in system; PostgreSQL and MySQL backup and restore; job queue and workers; scheduler; downloads through signed links; the legacy tool retired | Phases 1 and 6 |
+| **M3. Experience** | Dashboard; email and in-app notifications; members and invitations; activity views; translation polish | Phases 3 and 4 |
+| **Deploy** | AWS account, domain, KMS in place of the local master key, Stage A on EC2 | Phases 0 and 1 |
+
+Billing and the kill switch (Phase 2), admin configurability beyond storage (Phase 4), scale (Phase 5) and launch readiness (Phase 7) follow in the original order.
+
+**M1 status (4 Oct 2026): built and tested locally.** Deliberately left for later milestones: email verification, password reset and two-factor sign-in; invitations and belonging to more than one workspace; AWS KMS; browser end-to-end tests. See the limits listed in [ARCHITECTURE.md](ARCHITECTURE.md#11-known-limits-at-this-milestone).
 
 ### Definition of done (every phase)
 - Unit, E2E and cross-tenant suites green; CI security gates green; SBOM published.
@@ -392,3 +414,5 @@ Pick one or two, or tell me the feeling you want (serious/enterprise, playful/de
 1. ~~Name~~: **DBRB** chosen. Brand guide, logo and handle checks are in [BRAND.md](BRAND.md). Buy `dbrb.dev` (+ optional `dbrb.in`) and create the GitHub org `dbrbhq` at the start of Phase 0.
 2. ~~Domain~~: approved; buy it once the name is final.
 3. ~~AWS region~~: Mumbai (`ap-south-1`). Low latency for you, and it covers India data residency. EU and US regions are added in Stage C.
+4. The domain, the GitHub org and the AWS account wait for the Deploy phase (decision 16).
+5. Before accepting outside contributions: have a lawyer review `CLA.md` and `ee/LICENSE`, and set up a mailbox for conduct reports so a code of conduct can name a working contact.
