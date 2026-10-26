@@ -46,7 +46,7 @@ services:
   #   dbrb-platform      the platform's own bucket ("managed S3")
   #   dbrb-tenant-demo   stands in for a customer's own bucket
   s3:
-    image: rustfs/rustfs:1.0.1
+    image: rustfs/rustfs:1.0.3
     environment:
       RUSTFS_ACCESS_KEY: dbrb_s3_dev
       RUSTFS_SECRET_KEY: dbrb_s3_dev_secret
